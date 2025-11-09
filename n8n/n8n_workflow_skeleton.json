@@ -1,0 +1,65 @@
+{
+  "name": "QA Test Failure Alert - Demo",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "qa-result-webhook",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook - Receive QA Result",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://mock-cypress-runner.local/run",
+        "responseFormat": "json",
+        "options": {}
+      },
+      "name": "Trigger Mock Cypress Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "channel": "#qa-alerts",
+        "text": "⚠️ Teste falhou: {{$json.testName}} | Link do relatório: {{$json.reportUrl}}"
+      },
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [750, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Receive QA Result": {
+      "main": [
+        [
+          {
+            "node": "Trigger Mock Cypress Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Mock Cypress Run": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "version": 1
+}
